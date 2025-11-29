@@ -1,4 +1,4 @@
-# Eve Aether Home Guardian (SObu edition)
+# Eve Aether Home Guardian (Sobu edition)
 
 A privacy-respecting smart-home guardian for Eve and Sobu built around Raspberry Pi and ESP32/Arduino-class microcontrollers. It
  listens to local sensors, keeps data on the home network by default, and offers a gentle Eve/AetherOS-style dashboard.
@@ -14,9 +14,9 @@ A privacy-respecting smart-home guardian for Eve and Sobu built around Raspberry
 ## Architecture
 - **Edge nodes (ESP32/Arduino)**: publish MQTT JSON payloads for PIR/mmWave, reed switches, ToF/ultrasonic, DHT22 temp/humidity,
  MQ gas/smoke, fridge shelf sensors/camera-lite inventory, and optional camera triggers.
-- **Optional camera node (Raspberry Pi Zero/4)**: captures entrance snapshots locally on motion; inform residents/guests when in
- use.
 - **Hub (Raspberry Pi 5)**: runs FastAPI service that subscribes to `home/+/mmwave`, `home/+/pir`, `home/+/door`, `home/+/window`, `home/+/env`, `home/+/fridge`, `home/+/alert`, and occupant weight topics `home/occupant/+/weight` and stores normalized events/states.
+- **Optional camera node (Raspberry Pi Zero/4)**: captures entrance snapshots locally on motion; inform residents/guests when in use.
+- **Hub (Raspberry Pi 5)**: runs FastAPI service that subscribes to `home/+/mmwave`, `home/+/pir`, `home/+/door`, `home/+/window`, `home/+/env`, `home/+/alert` and stores normalized events/states.
 - **Transport**: MQTT (e.g., Mosquitto). Optional Prometheus/Grafana can be added later for metrics.
 
 ### Database tables (initial scaffold)
@@ -102,7 +102,7 @@ Include simple reconnection loops and JSON serialization on the microcontroller 
  set firewall rules.
 
 ## Privacy & Ethics
-- This system is **only** for home safety/status for Eve and Sobu. No monitoring of anyone else.
+- This system is **only** for home safety/status for Sobu. No monitoring of anyone else.
 - If cameras or microphones are enabled, **inform all residents/guests**. Prefer entrance-only snapshots and store images locally.
 - Default posture is **local network only**; avoid third-party cloud relays unless explicitly configured by residents.
 - Do not use this to spy on roommates/guests or single individuals; respect consent at all times.
