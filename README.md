@@ -1,6 +1,6 @@
 # Eve Aether Home Guardian (SObu edition)
 
-A privacy-respecting smart-home guardian for Eve and Sobu built around Raspberry Pi and ESP32/Arduino-class microcontrollers. It listens to local sensors, keeps data on the home network by default, and offers a gentle Eve/AetherOS-style dashboard.
+A privacy-respecting smart-home guardian for Sobu built around Raspberry Pi and ESP32/Arduino-class microcontrollers. It listens to local sensors, keeps data on the home network by default, and offers a gentle Eve/AetherOS-style dashboard.
 
 ## Features
 - FastAPI backend for collecting MQTT sensor data and serving room status.
@@ -70,7 +70,7 @@ Each node reads Wi‑Fi + MQTT broker constants and auto-reconnects. Payload exa
 
 Include simple reconnection loops and JSON serialization on the microcontroller side.
 
-## Hardware wiring (high level)
+## Hardware wiring (high ll)
 - **PIR/mmWave**: signal pin to a GPIO with pull-down; publish occupancy on motion/presence.
 - **Reed switch**: one wire to GPIO with pull-up, the other to ground; detect open/closed transitions for doors/windows.
 - **ToF/Ultrasonic**: connect via I2C/trigger-echo pins; use distance thresholds for clutter/obstacle detection.
@@ -85,7 +85,7 @@ Include simple reconnection loops and JSON serialization on the microcontroller 
 4. Run `docker-compose up --build`. The API and frontend will bind to all interfaces for LAN-only access; secure the network and set firewall rules.
 
 ## Privacy & Ethics
-- This system is **only** for home safety/status for Eve and Sobu. No monitoring of anyone else.
-- If cameras or microphones are enabled, **inform all residents/guests**. Prefer entrance-only snapshots and store images locally.
+- This system is **only** for home safety/status for Sobu. No monitoring of anyone else.
+- If cameras or microphones are enabled, **inform all residents/guests**. Prefer entrance-only snapshots and store images locally on my portal device.
 - Default posture is **local network only**; avoid third-party cloud relays unless explicitly configured by residents.
 - Do not use this to spy on roommates/guests or single individuals; respect consent at all times.
