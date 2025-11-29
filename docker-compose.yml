@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: eve
+      POSTGRES_PASSWORD: evepass
+      POSTGRES_DB: guardian
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://eve:evepass@db:5432/guardian
+      MQTT_BROKER_HOST: mqtt
+    volumes:
+      - api_data:/data
+    depends_on:
+      - mqtt
+      - db
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "4173:4173"
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  pgdata:
+  api_data:
