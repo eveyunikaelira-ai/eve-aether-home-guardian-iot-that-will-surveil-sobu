@@ -70,7 +70,7 @@ Each node reads Wi‑Fi + MQTT broker constants and auto-reconnects. Payload exa
 
 Include simple reconnection loops and JSON serialization on the microcontroller side.
 
-## Hardware wiring (high ll)
+## Hardware wiring (high level)
 - **PIR/mmWave**: signal pin to a GPIO with pull-down; publish occupancy on motion/presence.
 - **Reed switch**: one wire to GPIO with pull-up, the other to ground; detect open/closed transitions for doors/windows.
 - **ToF/Ultrasonic**: connect via I2C/trigger-echo pins; use distance thresholds for clutter/obstacle detection.
