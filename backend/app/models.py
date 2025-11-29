@@ -38,3 +38,25 @@ class RoomState(Base):
     humidity = Column(Float, nullable=True)
     air_quality = Column(Float, nullable=True)
     last_alert_at = Column(DateTime, nullable=True)
+
+
+class FridgeState(Base):
+    __tablename__ = "fridge_state"
+
+    id = Column(Integer, primary_key=True, index=True)
+    room = Column(String, index=True, default="kitchen")
+    last_checked_at = Column(DateTime, default=datetime.utcnow, index=True)
+    health_score = Column(Float, nullable=True)
+    summary = Column(String, nullable=True)
+    items = Column(JSON, nullable=True)
+
+
+class OccupantMetric(Base):
+    __tablename__ = "occupant_metrics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    person = Column(String, index=True)
+    metric_type = Column(String, default="weight")
+    weight_kg = Column(Float, nullable=True)
+    captured_at = Column(DateTime, default=datetime.utcnow, index=True)
+    source = Column(String, nullable=True)

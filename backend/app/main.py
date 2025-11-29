@@ -7,8 +7,15 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .database import engine, get_db
-from .models import Base, RoomState
-from .schemas import RoomStateBase, RoomStateList
+from .models import Base, RoomState, FridgeState, OccupantMetric
+from .schemas import (
+    RoomStateBase,
+    RoomStateList,
+    FridgeStateBase,
+    FridgeStateList,
+    OccupantMetricBase,
+    OccupantMetricList,
+)
 from .mqtt import start_mqtt_background
 
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +45,18 @@ def seed_demo_data():
                 RoomState(room="kitchen", occupied=False, door_open=True, window_open=False, temperature=22.0, humidity=45.0, air_quality=15, last_seen_at=now),
             ]
             db.add_all(demo_rooms)
-            db.commit()
+        if db.query(FridgeState).count() == 0:
+            fridge = FridgeState(
+                room="kitchen",
+                summary="Balanced mix of greens, fruit, and Luminora rolls",
+                health_score=0.82,
+                items={"healthy": ["salad", "berries", "Luminora rolls"], "less_healthy": ["soda can"]},
+            )
+            db.add(fridge)
+        if db.query(OccupantMetric).count() == 0:
+            metric = OccupantMetric(person="sobu", metric_type="weight", weight_kg=68.5, source="demo-scale")
+            db.add(metric)
+        db.commit()
     finally:
         db.close()
 
@@ -47,6 +65,28 @@ def seed_demo_data():
 def list_rooms(db: Session = Depends(get_db)):
     rooms: List[RoomState] = db.query(RoomState).all()
     return RoomStateList(rooms=rooms)
+
+
+@app.get("/api/v1/fridge", response_model=FridgeStateList)
+def latest_fridge(db: Session = Depends(get_db)):
+    fridges: List[FridgeState] = (
+        db.query(FridgeState)
+        .order_by(FridgeState.last_checked_at.desc())
+        .all()
+    )
+    return FridgeStateList(fridges=fridges)
+
+
+@app.get("/api/v1/occupants/{person}/weight", response_model=OccupantMetricList)
+def occupant_weight(person: str, db: Session = Depends(get_db), limit: int = 10):
+    metrics: List[OccupantMetric] = (
+        db.query(OccupantMetric)
+        .filter(OccupantMetric.person == person)
+        .order_by(OccupantMetric.captured_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return OccupantMetricList(metrics=metrics)
 
 
 @app.get("/")

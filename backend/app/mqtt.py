@@ -2,13 +2,12 @@ import json
 import logging
 import threading
 from datetime import datetime
-from typing import Callable
 
 import paho.mqtt.client as mqtt
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .models import Event, RoomState, Sensor
+from .models import Event, RoomState, Sensor, FridgeState, OccupantMetric
 from .database import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,9 @@ MQTT_TOPICS = [
     ("home/+/door", 0),
     ("home/+/window", 0),
     ("home/+/env", 0),
+    ("home/+/fridge", 0),
     ("home/+/alert", 0),
+    ("home/occupant/+/weight", 0),
 ]
 
 
@@ -33,9 +34,40 @@ def ensure_sensor(db: Session, sensor_id: str, room: str, sensor_type: str):
     return sensor
 
 
+def handle_fridge(db: Session, room: str, payload: dict, sensor_id: str):
+    summary = payload.get("summary")
+    health_score = payload.get("health_score")
+    items = payload.get("items")
+    fridge_state = FridgeState(room=room, summary=summary, health_score=health_score, items=items)
+    db.add(fridge_state)
+
+
+def handle_occupant_weight(db: Session, person: str, payload: dict, sensor_id: str):
+    weight = payload.get("weight") or payload.get("weight_kg")
+    metric = OccupantMetric(
+        person=person,
+        metric_type="weight",
+        weight_kg=weight,
+        source=payload.get("source") or "scale",
+    )
+    db.add(metric)
+    ensure_sensor(db, sensor_id, room=person, sensor_type="weight")
+
+
 def persist_event(db: Session, topic: str, payload: dict):
     try:
         parts = topic.split("/")
+        if len(parts) >= 4 and parts[1] == "occupant":
+            person = parts[2]
+            metric_type = parts[3]
+            sensor_id = payload.get("sensor_id") or f"occupant-{person}-{metric_type}"
+            event = Event(sensor_id=sensor_id, event_type=metric_type, payload_json=payload)
+            db.add(event)
+            if metric_type == "weight":
+                handle_occupant_weight(db, person, payload, sensor_id)
+            db.commit()
+            return
+
         _, room, sensor_type = parts[0], parts[1], parts[2]
         sensor_id = payload.get("sensor_id") or f"{room}-{sensor_type}"
         ensure_sensor(db, sensor_id, room, sensor_type)
@@ -61,6 +93,8 @@ def persist_event(db: Session, topic: str, payload: dict):
             room_state.temperature = payload.get("temperature")
             room_state.humidity = payload.get("humidity")
             room_state.air_quality = payload.get("air_quality")
+        elif sensor_type == "fridge":
+            handle_fridge(db, room, payload, sensor_id)
 
         db.commit()
     except Exception:
