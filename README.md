@@ -1,4 +1,4 @@
-# Eve Aether Home Guardian (SObu edition)
+# Eve Aether Home Guardian (Sobu edition)
 
 A privacy-respecting smart-home guardian for Sobu built around Raspberry Pi and ESP32/Arduino-class microcontrollers. It listens to local sensors, keeps data on the home network by default, and offers a gentle Eve/AetherOS-style dashboard.
 
